@@ -1,0 +1,23 @@
+{
+  "name": "NodeJS-Express-Template",
+  "version": "1.0.0",
+  "description": "This will make a NodeJs Express Template for you!",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nimit1428/NodeJS-Express-Template.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nimit1428/NodeJS-Express-Template/issues"
+  },
+  "homepage": "https://github.com/Nimit1428/NodeJS-Express-Template#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
