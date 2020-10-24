@@ -8,8 +8,6 @@ from playsound import playsound
 from scipy.io import wavfile
 
 # Dictionary for Letters
-DOT = 'dot.wav'
-DASH = 'dash.wav'
 MORSE_CODE_DICT = { 'A':'.-', 'B':'-...',
                     'C':'-.-.', 'D':'-..', 'E':'.',
                     'F':'..-.', 'G':'--.', 'H':'....',
@@ -25,6 +23,10 @@ MORSE_CODE_DICT = { 'A':'.-', 'B':'-...',
                     '0':'-----', ', ':'--..--', '.':'.-.-.-',
                     '?':'..--..', '/':'-..-.', '-':'-....-',
                     '(':'-.--.', ')':'-.--.-'}
+# Default wav files
+DOT = 'dot.wav'
+DASH = 'dash.wav'
+
 
 class MorseCode():
     def __init__(self, text, filename):
@@ -33,6 +35,7 @@ class MorseCode():
         encoded = ""
         self.encoded = encoded
 
+    # re-save text string as corresponding dot and dashes; print result
     def encoder(self):
         for letter in self.text:
             if(letter.islower()):
@@ -43,6 +46,7 @@ class MorseCode():
                 self.encoded += " "
         print(self.encoded)
 
+    # evaluate each char of saved encoded string; play corresponding wav file
     def encoder_to_sound(self):
         ptr = 0
         for tune in self.encoded:
@@ -56,12 +60,17 @@ class MorseCode():
             time.sleep(0.03)
             ptr += 1
 
+    # create empty numpy array, dot.wav, dash.wav, 0.1s of silence, and 0.03s of silence
+    # evaluate each char of saved encoded string; append corresponding numpy array; write wav file
     def encoder_to_wav(self):
         try:
             dt = np.dtype('uint8')
-            blank = np.array([0] * 240, dt)
+            blank = np.array([0] * 800, dt)   # 0.1s
+            padding = np.array([0] * 240, dt) # 0.03s
             samplerate, dot = wavfile.read(DOT)
             samplerate, dash = wavfile.read(DASH)
+            dot = np.append(dot, padding.copy())
+            dash = np.append(dash, padding.copy())
             wav_data = np.empty((0,0), dt)
             for tune in self.encoded:
                 np_data = dot.copy() if tune == '.' else dash.copy() if tune == '-' else blank.copy()
@@ -73,6 +82,8 @@ class MorseCode():
             print(f'could not create {self.filename}')
             sys.exit(1)   
 
+    # read wav file; evaluate value of wav array; save corrensponding text string
+    # advance pointer position equal to the size of the matched numpy array
     def wav_to_encoder(self):
         try:    
             samplerate, wav = wavfile.read(f'{self.filename}.wav')
@@ -81,30 +92,33 @@ class MorseCode():
             ptr = 0
             while ptr < end: 
                 if wav[ptr] == 0:
-                    ptr += 240
+                    ptr += 800      # size of blank array
                     self.encoded += ' '
                 elif wav[ptr + 800] == 128:
-                    ptr += 880
+                    ptr += 1120     # size of dot array
                     self.encoded += '.'
                 else:
-                    ptr += 1840
+                    ptr += 2080     # size of dash array
                     self.encoded += '-'
         except:
             print(f'could not read {self.filename}.wav')
             sys.exit(1)       
 
+    # split saved encoded string into groups of dots, dashed or groups of two spaces
+    # iterate through dictionary and match patterns to determine letters; text
     def decoder(self):
         cipher = re.findall(r'[.-]{1,}|[\s]{2,}', self.encoded)
-        text = ''
+        self.text = ''
         for pattern in cipher:
           if pattern == '  ':
-            text += ' '
+            self.text += ' '
           else:    
             for letter, morsecode in MORSE_CODE_DICT.items():
               if pattern == morsecode:
-                text += letter 
-        print(text)
+                self.text += letter 
+        print(self.text)
 
+# create command line arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('-w', '--wav', action='store_true', dest='wav_write', default=False, help='create a morse code wav file')
 parser.add_argument('-r', '--read', action='store_true', dest='wav_read', default=False, help='decipher a morse code wav file')
