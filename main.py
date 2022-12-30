@@ -4,8 +4,8 @@ import re
 import sys
 import time
 
-from playsound import playsound
 from scipy.io import wavfile
+import winsound
 
 # Dictionary for Letters
 DOT = 'dot.wav'
@@ -47,9 +47,9 @@ class MorseCode():
         ptr = 0
         for tune in self.encoded:
             if(tune == "."):
-                playsound(DOT)
+                winsound.PlaySound(DOT, winsound.SND_FILENAME)
             elif(tune == "-"):
-                playsound(DASH)
+                winsound.PlaySound(DASH, winsound.SND_FILENAME)
             elif(tune == " "):
                 tune = "blank"
                 time.sleep(0.07)
